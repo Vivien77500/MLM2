@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Assistant', sans-serif;
+            background-color: #f7f9fc;
+            color: #333;
+        }
+        h2, h3 {
+            color: #2a9d8f;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background-color: #264653;
+            color: #fff;
+            font-weight: 600;
+        }
+        td {
+            background-color: #fff;
+            font-weight: 400;
+        }
+        input, select {
+            padding: 10px;
+            margin-bottom: 20px;
+            font-size: 1rem;
+            width: 100%;
+            max-width: 400px;
+            margin: 10px auto;
+            display: block;
+            border-radius: 8px;
+            border: 2px solid #2a9d8f;
+            background-color: #fff;
+        }
+        .important-info {
+            color: #e76f51;
+            font-weight: 600;
+        }
+        .our-offer {
+            background-color: #6fb98f;
+        }
+    </style>
+    <title>Calculateur de Rétribution</title>
+</head>
+<body>
+
+    <h2>Calculateur de Rétribution</h2>
+
+    <label for="annual-revenue">Chiffre d'affaires annuel (€ HT) :</label>
+    <input type="number" id="annual-revenue" placeholder="Entrez le chiffre d'affaires annuel" required>
+
+    <label for="monthly-pack">Prix pack mensuel (€ TTC) :</label>
+    <input type="number" id="monthly-pack" placeholder="Entrez le prix du pack mensuel" required>
+
+    <label for="percentage-select">Choisissez un pourcentage de rétribution :</label>
+    <select id="percentage-select">
+        <option value="0.45">45%</option>
+        <option value="0.60">60%</option>
+        <option value="0.69">69%</option>
+        <option value="0.70">70%</option>
+        <option value="0.75">75%</option>
+        <option value="0.80">80%</option>
+        <option value="0.85">85%</option>
+    </select>
+
+    <table id="comparison-table">
+        <thead>
+            <tr>
+                <th>Chiffre d'affaires annuel</th>
+                <th>Prix pack/année (€)</th>
+                <th>Rétribution totale (€ HT)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td id="ca-value"></td>
+                <td id="annual-pack-value" class="important-info"></td>
+                <td id="retribution-total" class="important-info"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Rétribution avec Notre Offre</h3>
+    <table id="our-offer-table" class="our-offer">
+        <thead>
+            <tr>
+                <th>Chiffre d'affaires annuel</th>
+                <th>Rétribution totale (€ HT)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Chiffre d'affaires annuel</td>
+                <td id="our-retribution" class="important-info"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script>
+        const calculateRetribution = () => {
+            const annualRevenue = parseFloat(document.getElementById("annual-revenue").value);
+            const monthlyPack = parseFloat(document.getElementById("monthly-pack").value);
+            const percentage = parseFloat(document.getElementById("percentage-select").value);
+
+            if (!annualRevenue || !monthlyPack) {
+                alert("Veuillez remplir les champs obligatoires.");
+                return;
+            }
+
+            const annualPack = monthlyPack * 12;
+            const retribution = (annualRevenue * percentage) - annualPack;
+
+            document.getElementById("ca-value").textContent = annualRevenue.toFixed(2) + " €";
+            document.getElementById("annual-pack-value").textContent = annualPack.toFixed(2) + " €";
+            document.getElementById("retribution-total").textContent = retribution.toFixed(2) + " €";
+
+            // Calcul de la rétribution selon l'offre avec paliers
+            calculateOurOffer(annualRevenue);
+        };
+
+        const calculateOurOffer = (ca) => {
+            const paliers = [
+                { "limit": 35000, "rate": 0.75 },
+                { "limit": 75000, "rate": 0.85 },
+                { "limit": Infinity, "rate": 1.00 }
+            ];
+
+            let totalRetribution = 0;
+            let remainingCA = ca;
+
+            for (let palier of paliers) {
+                if (remainingCA > palier.limit) {
+                    totalRetribution += palier.limit * palier.rate;
+                    remainingCA -= palier.limit;
+                } else {
+                    totalRetribution += remainingCA * palier.rate;
+                    break;
+                }
+            }
+
+            document.getElementById("our-retribution").textContent = totalRetribution.toFixed(2) + " €";
+        };
+
+        // Ajout d'écouteurs pour recalculer à chaque changement d'entrée
+        document.getElementById("annual-revenue").addEventListener("input", calculateRetribution);
+        document.getElementById("monthly-pack").addEventListener("input", calculateRetribution);
+        document.getElementById("percentage-select").addEventListener("change", calculateRetribution);
+
+    </script>
+</body>
+</html>
